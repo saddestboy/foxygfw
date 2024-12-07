@@ -83,57 +83,47 @@ else:
 with open("base.json") as f:
     base = load(f)
 
-base["whitePatterns"] = []
 
-
-def get_dict(rule: str) -> (int, dict):
+def get_dict(rule: str) -> (dict):
     # Get pattern dict
-    result = (0, {})
 
     try:
-        protocol = 1
-        white = 1
+        white = "exclude"
 
         # White rule
         if rule.startswith("@@"):
             rule = rule[2:]
         else:
-            white = 0
+            white = "include"
 
-        # Get protocol
+        # Get match type and format the rule
         if rule.startswith("|http://"):
-            protocol = 2
             rule = sub("^\\|http://", "|", rule)
         elif rule.startswith("|https://"):
-            protocol = 4
             rule = sub("^\\|https://", "||", rule)
-
-        # Get match type
         if rule.startswith("||"):
             rule = f"*.{rule[2:]}"
         elif rule.startswith("|"):
             rule = rule[1:]
-
-        # Format the rule
-        rule = rule.split("/")[0]
-
+        if rule.startswith("."):
+            rule = f"*{rule}"
         if "." not in rule:
             rule = f"*{rule}*"
-
+        rule = rule.split("/")[0]
+        
         the_dict = {
             "title": rule,
             "pattern": rule,
-            "type": 1,
-            "protocols": protocol,
+            "include": white,
+            "type": "wildcard",
             "active": True
         }
 
-        result = (white, the_dict)
     except Exception as ee:
         print(f"[ERROR] Get dict error: {e}")
         logger.warning(f"Get dict error: {ee}", exc_info=True)
 
-    return result
+    return the_dict
 
 
 def main() -> bool:
@@ -171,20 +161,17 @@ def main() -> bool:
             if rule.startswith("/") and rule.endswith("/"):
                 continue
 
-            white, the_dict = get_dict(rule)
+            the_dict = get_dict(rule)
 
             if not the_dict:
                 continue
 
-            if white:
-                base["blackPatterns"].append(the_dict)
-            else:
-                base["whitePatterns"].append(the_dict)
+            base.append(the_dict)
 
         print("[INFO] Saving the output file...")
 
         with open("output.json", "w") as ff:
-            dump(base, ff, indent=4)
+            dump(base, ff, indent=2)
 
         print("[INFO] Succeeded!")
         print("[INFO] Please check the file: output.json")
