@@ -20,9 +20,7 @@ jobs:
 
       - name: Download foxygfw release
         run: |
-          curl -L -o foxygfw.tar.gz https://github.com/lsr0LSR/foxygfw/archive/refs/tags/${{ github.event.inputs.release_tag }}.tar.gz
-          tar -xzf foxygfw.tar.gz
-          mv foxygfw-${{ github.event.inputs.release_tag }} foxygfw
+          git clone https://github.com/scp-079/foxygfw.git foxygfw
 
       - name: Set up and run the script
         working-directory: foxygfw
