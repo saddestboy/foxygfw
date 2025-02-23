@@ -1,18 +1,14 @@
 name: Run foxygfw
 
-# Define when the workflow should run
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
-# Define the jobs to be executed
 jobs:
   build:
-    # Use the latest Ubuntu runner
     runs-on: ubuntu-latest
-
-    # List of steps to perform the job
     steps:
     - name: Update package list
       run: sudo apt update
@@ -32,3 +28,9 @@ jobs:
         pip install -r requirements.txt
         python main.py
         deactivate
+
+    - name: Upload output.json
+      uses: actions/upload-artifact@v3
+      with:
+        name: output-json
+        path: foxygfw/output.json
