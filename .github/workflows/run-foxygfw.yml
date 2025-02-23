@@ -31,9 +31,14 @@ jobs:
           pip install -r requirements.txt
           python main.py
           deactivate
-
-      - name: Upload output.json
-        uses: actions/upload-artifact@v4
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.2.1
         with:
-          name: output-json-${{ github.event.inputs.release_tag }}
-          path: foxygfw/output.json
+          tag_name: ${{ github.event.inputs.output_tag }}
+          name: Output from ${{ github.event.inputs.release_tag }}
+          body: |
+            This release contains the output.json generated from release ${{ github.event.inputs.release_tag }} of lsr0LSR/foxygfw.
+          files: foxygfw/output.json
+          fail_on_unmatched_files: true
+          generate_release_notes: false
