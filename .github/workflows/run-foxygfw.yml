@@ -1,0 +1,34 @@
+name: Run foxygfw
+
+# Define when the workflow should run
+on:
+  push:
+    branches:
+      - main
+
+# Define the jobs to be executed
+jobs:
+  build:
+    # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
+
+    # List of steps to perform the job
+    steps:
+    - name: Update package list
+      run: sudo apt update
+
+    - name: Install git and python3-venv
+      run: sudo apt install git python3-venv -y
+
+    - name: Clone foxygfw repository
+      run: git clone https://github.com/lsr0LSR/foxygfw.git foxygfw
+
+    - name: Set up and run the script
+      working-directory: foxygfw
+      run: |
+        cp config.ini.example config.ini
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+        python main.py
+        deactivate
