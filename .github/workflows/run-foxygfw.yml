@@ -1,36 +1,41 @@
-name: Run foxygfw
+name: Run foxygfw from release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+    inputs:
+      release_tag:
+        description: 'Release tag to use'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Update package list
-      run: sudo apt update
+      - name: Update package list
+        run: sudo apt update
 
-    - name: Install git and python3-venv
-      run: sudo apt install git python3-venv -y
+      - name: Install git and python3-venv
+        run: sudo apt install git python3-venv -y
 
-    - name: Clone foxygfw repository
-      run: git clone https://github.com/lsr0LSR/foxygfw.git foxygfw
+      - name: Download foxygfw release
+        run: |
+          curl -L -o foxygfw.tar.gz https://github.com/lsr0LSR/foxygfw/archive/refs/tags/${{ github.event.inputs.release_tag }}.tar.gz
+          tar -xzf foxygfw.tar.gz
+          mv foxygfw-${{ github.event.inputs.release_tag }} foxygfw
 
-    - name: Set up and run the script
-      working-directory: foxygfw
-      run: |
-        cp config.ini.example config.ini
-        python3 -m venv venv
-        source venv/bin/activate
-        pip install -r requirements.txt
-        python main.py
-        deactivate
+      - name: Set up and run the script
+        working-directory: foxygfw
+        run: |
+          cp config.ini.example config.ini
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          python main.py
+          deactivate
 
-    - name: Upload output.json
-      uses: actions/upload-artifact@v3
-      with:
-        name: output-json
-        path: foxygfw/output.json
+      - name: Upload output.json
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-json-${{ github.event.inputs.release_tag }}
+          path: foxygfw/output.json
